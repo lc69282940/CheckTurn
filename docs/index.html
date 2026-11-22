@@ -85,7 +85,7 @@
   <div id="table"></div>
 
   <footer>
-    表头下方可直接输入，或从下拉框选择筛选条件；点表头排序，右上角可改每页条数。数据由 GitHub Actions 每日更新。
+    表头下方可直接输入，或从下拉框选择筛选条件；下拉选项会跟随其他列的筛选自动收窄。点表头排序，右上角可改每页条数。数据由 GitHub Actions 每日更新。
   </footer>
 </div>
 
@@ -138,6 +138,7 @@
       select.value = current || "";
       select.addEventListener("change", function () {
         success(select.value);
+        refreshSelectOptions();
       });
       onRendered(function () {});
       return select;
@@ -155,6 +156,121 @@
       }
     });
     return out.sort();
+  }
+
+  // ---------- 级联筛选：只保留在当前其他筛选条件下有数据的选项 ----------
+  var allRows = [];
+  var SELECT_FIELDS = ["Google跳转", "纯净度", "是否家宽", "是否原生", "国家", "代理标记", "机房标记", "判定"];
+  var PREFERRED_ORDER = {
+    "Google跳转": ["无", "大陆判定"],
+    "纯净度": ["纯净", "中性", "风险", "未取到"],
+    "是否家宽": ["是", "否", "未取到"],
+    "是否原生": ["是", "否", "未取到"],
+    "代理标记": ["是", "否"],
+    "机房标记": ["是", "否"],
+    "判定": ["正常", "不通", "大陆判定", "跳转异常"]
+  };
+
+  function selectElement(field) {
+    var col = document.querySelector('.tabulator-col[tabulator-field="' + field + '"]');
+    return col ? col.querySelector(".tabulator-header-filter select") : null;
+  }
+
+  function currentFilters() {
+    var state = {};
+    SELECT_FIELDS.forEach(function (f) {
+      var s = selectElement(f);
+      if (s && s.value) state[f] = { exact: s.value };
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".tabulator-header-filter input"), function (inp) {
+      if (!inp.value) return;
+      var col = inp.closest(".tabulator-col");
+      var f = col ? col.getAttribute("tabulator-field") : null;
+      if (f) state[f] = { like: inp.value };
+    });
+    return state;
+  }
+
+  function rowMatches(row, exceptField, state) {
+    for (var f in state) {
+      if (f === exceptField) continue;
+      var cond = state[f];
+      var v = row[f];
+      if (cond.exact !== undefined) {
+        if (String(v) !== cond.exact) return false;
+      } else {
+        if (v === null || v === undefined) return false;
+        if (String(v).toLowerCase().indexOf(String(cond.like).toLowerCase()) === -1) return false;
+      }
+    }
+    return true;
+  }
+
+  function valuesFor(field, state) {
+    var seen = {}, out = [];
+    allRows.forEach(function (row) {
+      if (!rowMatches(row, field, state)) return;
+      var v = row[field];
+      if (v === null || v === undefined || v === "") return;
+      v = String(v);
+      if (!seen[v]) {
+        seen[v] = true;
+        out.push(v);
+      }
+    });
+    return out;
+  }
+
+  function refreshSelectOptions() {
+    var state = currentFilters();
+    SELECT_FIELDS.forEach(function (field) {
+      var sel = selectElement(field);
+      if (!sel) return;
+      var current = sel.value;
+      var valid = valuesFor(field, state);
+      var order = PREFERRED_ORDER[field] || valid.slice().sort();
+      var ordered = order.filter(function (v) { return valid.indexOf(v) !== -1; });
+      valid.forEach(function (v) {
+        if (ordered.indexOf(v) === -1) ordered.push(v);
+      });
+      sel.textContent = "";
+      var all = document.createElement("option");
+      all.value = "";
+      all.textContent = "全部";
+      sel.appendChild(all);
+      ordered.forEach(function (v) {
+        var o = document.createElement("option");
+        o.value = v;
+        o.textContent = v;
+        sel.appendChild(o);
+      });
+      if (current && ordered.indexOf(current) === -1) {
+        var extra = document.createElement("option");
+        extra.value = current;
+        extra.textContent = current + "（无匹配）";
+        sel.appendChild(extra);
+      }
+      sel.value = current || "";
+    });
+  }
+
+  function debounce(fn, ms) {
+    var t;
+    return function () {
+      clearTimeout(t);
+      t = setTimeout(fn, ms);
+    };
+  }
+
+  function bindTextFilters() {
+    Array.prototype.forEach.call(document.querySelectorAll(".tabulator-header-filter input"), function (inp) {
+      if (inp.dataset.bound) return;
+      inp.dataset.bound = "1";
+      var run = debounce(refreshSelectOptions, 180);
+      inp.addEventListener("keyup", run);
+      inp.addEventListener("search", run);
+      inp.addEventListener("change", run);
+    });
   }
 
   function el(tag, cls, text) {
@@ -302,6 +418,8 @@
 
   document.getElementById("reset").addEventListener("click", function () {
     table.clearHeaderFilter();
+    refreshSelectOptions();
+    bindTextFilters();
     table.setSort([{ column: "带宽MB/s", dir: "desc" }]);
   });
 
@@ -328,10 +446,13 @@
       NUMERIC.forEach(function (k) { r[k] = num(r[k]); });
       rows.push(r);
     });
+    allRows = rows;
     table.setData(rows);
     // 国家下拉的选项来自数据，数据到位后重建一次
     var countryCol = table.getColumn("国家");
     if (countryCol) countryCol.reloadHeaderFilter();
+    refreshSelectOptions();
+    bindTextFilters();
     statusEl.style.display = "none";
   }).catch(function (err) {
     statusEl.className = "status error";
