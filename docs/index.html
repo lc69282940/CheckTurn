@@ -160,9 +160,8 @@
 
   // ---------- 级联筛选：只保留在当前其他筛选条件下有数据的选项 ----------
   var allRows = [];
-  var SELECT_FIELDS = ["Google跳转", "纯净度", "是否家宽", "是否原生", "国家", "代理标记", "机房标记", "判定"];
+  var SELECT_FIELDS = ["纯净度", "是否家宽", "是否原生", "国家", "代理标记", "机房标记", "判定"];
   var PREFERRED_ORDER = {
-    "Google跳转": ["无", "大陆判定"],
     "纯净度": ["纯净", "中性", "风险", "未取到"],
     "是否家宽": ["是", "否", "未取到"],
     "是否原生": ["是", "否", "未取到"],
@@ -332,11 +331,6 @@
     return badge(v || "-", v === "是" ? "warn" : "muted");
   }
 
-  function fmtRedirect(cell) {
-    var v = cell.getValue() || "无";
-    return badge(v, v === "大陆判定" ? "bad" : "muted");
-  }
-
   function fmtVerdict(cell) {
     var v = cell.getValue() || "-";
     return badge(v, v === "正常" ? "ok" : (v === "大陆判定" ? "bad" : (v === "跳转异常" ? "warn" : "muted")));
@@ -370,8 +364,6 @@
     { title: "中继", field: "中继", minWidth: 280, headerFilter: "input", formatter: fmtRelay },
     { title: "出口IP", field: "出口IP", minWidth: 135, headerFilter: "input" },
     { title: "延迟s", field: "延迟秒", minWidth: 85, sorter: "number", headerFilter: "input", hozAlign: "right", formatter: fmtDelay },
-    { title: "Google", field: "Google状态码", minWidth: 85, headerFilter: "input", hozAlign: "center" },
-    { title: "跳转", field: "Google跳转", minWidth: 95, headerFilter: makeSelect(["无", "大陆判定"]), formatter: fmtRedirect },
     { title: "并发", field: "并发", minWidth: 70, sorter: "number", headerFilter: "input", hozAlign: "right" },
     { title: "带宽MB/s", field: "带宽MB/s", minWidth: 100, sorter: "number", headerFilter: "input", hozAlign: "right", formatter: fmtBW },
     { title: "风控值", field: "风控值", minWidth: 85, sorter: "number", headerFilter: "input", hozAlign: "right", formatter: fmtRisk },
