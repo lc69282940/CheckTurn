@@ -109,16 +109,53 @@
     "https://cdn.jsdelivr.net/gh/lc69282940/gh-turnrank@main/rank/rank-latest.csv"
   ];
   var NUMERIC = ["延迟秒", "并发", "带宽MB/s", "风控值"];
-  var SELECT_FILTERS = {
-    "Google跳转": ["无", "大陆判定"],
-    "纯净度": ["纯净", "中性", "风险", "未取到"],
-    "是否家宽": ["是", "否", "未取到"],
-    "是否原生": ["是", "否", "未取到"],
-    "国家": [],
-    "代理标记": ["是", "否"],
-    "机房标记": ["是", "否"],
-    "判定": ["正常", "不通", "大陆判定", "跳转异常"]
-  };
+
+  // 自定义表头筛选编辑器：直接返回原生 <select>。
+  // 不能用 Tabulator 的 "select"（v6 没有这个编辑器），也不能在渲染后替换 input，
+  // 因为 setHeaderFilterValue / clearHeaderFilter 会重建筛选元素。
+  function makeSelect(valuesFor) {
+    return function (cell, onRendered, success) {
+      var select = document.createElement("select");
+      select.setAttribute("aria-label", cell.getField() + "筛选");
+      var current = cell.getValue();
+      var values = typeof valuesFor === "function" ? valuesFor(cell) : valuesFor;
+      var all = document.createElement("option");
+      all.value = "";
+      all.textContent = "全部";
+      select.appendChild(all);
+      values.forEach(function (v) {
+        var o = document.createElement("option");
+        o.value = v;
+        o.textContent = v;
+        select.appendChild(o);
+      });
+      if (current && values.indexOf(current) === -1) {
+        var extra = document.createElement("option");
+        extra.value = current;
+        extra.textContent = current;
+        select.appendChild(extra);
+      }
+      select.value = current || "";
+      select.addEventListener("change", function () {
+        success(select.value);
+      });
+      onRendered(function () {});
+      return select;
+    };
+  }
+
+  function countryValues(cell) {
+    var data = cell.getTable().getData() || [];
+    var seen = {}, out = [];
+    data.forEach(function (r) {
+      var v = r["国家"];
+      if (v && !seen[v]) {
+        seen[v] = true;
+        out.push(v);
+      }
+    });
+    return out.sort();
+  }
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -218,20 +255,20 @@
     { title: "出口IP", field: "出口IP", minWidth: 135, headerFilter: "input" },
     { title: "延迟s", field: "延迟秒", minWidth: 85, sorter: "number", headerFilter: "input", hozAlign: "right", formatter: fmtDelay },
     { title: "Google", field: "Google状态码", minWidth: 85, headerFilter: "input", hozAlign: "center" },
-    { title: "跳转", field: "Google跳转", minWidth: 95, headerFilter: "input", formatter: fmtRedirect },
+    { title: "跳转", field: "Google跳转", minWidth: 95, headerFilter: makeSelect(["无", "大陆判定"]), formatter: fmtRedirect },
     { title: "并发", field: "并发", minWidth: 70, sorter: "number", headerFilter: "input", hozAlign: "right" },
     { title: "带宽MB/s", field: "带宽MB/s", minWidth: 100, sorter: "number", headerFilter: "input", hozAlign: "right", formatter: fmtBW },
     { title: "风控值", field: "风控值", minWidth: 85, sorter: "number", headerFilter: "input", hozAlign: "right", formatter: fmtRisk },
-    { title: "纯净度", field: "纯净度", minWidth: 85, headerFilter: "input", formatter: fmtPurity },
-    { title: "家宽", field: "是否家宽", minWidth: 70, headerFilter: "input", formatter: fmtResi },
-    { title: "原生", field: "是否原生", minWidth: 70, headerFilter: "input", formatter: fmtNative },
-    { title: "国家", field: "国家", minWidth: 70, headerFilter: "input" },
+    { title: "纯净度", field: "纯净度", minWidth: 85, headerFilter: makeSelect(["纯净", "中性", "风险", "未取到"]), formatter: fmtPurity },
+    { title: "家宽", field: "是否家宽", minWidth: 70, headerFilter: makeSelect(["是", "否", "未取到"]), formatter: fmtResi },
+    { title: "原生", field: "是否原生", minWidth: 70, headerFilter: makeSelect(["是", "否", "未取到"]), formatter: fmtNative },
+    { title: "国家", field: "国家", minWidth: 70, headerFilter: makeSelect(countryValues) },
     { title: "城市", field: "城市", minWidth: 110, headerFilter: "input" },
     { title: "运营商", field: "运营商", minWidth: 160, headerFilter: "input" },
     { title: "AS", field: "AS", minWidth: 180, headerFilter: "input" },
-    { title: "代理", field: "代理标记", minWidth: 70, headerFilter: "input", hozAlign: "center", formatter: fmtFlag },
-    { title: "机房", field: "机房标记", minWidth: 70, headerFilter: "input", hozAlign: "center", formatter: fmtFlag },
-    { title: "判定", field: "判定", minWidth: 80, headerFilter: "input", formatter: fmtVerdict },
+    { title: "代理", field: "代理标记", minWidth: 70, headerFilter: makeSelect(["是", "否"]), hozAlign: "center", formatter: fmtFlag },
+    { title: "机房", field: "机房标记", minWidth: 70, headerFilter: makeSelect(["是", "否"]), hozAlign: "center", formatter: fmtFlag },
+    { title: "判定", field: "判定", minWidth: 80, headerFilter: makeSelect(["正常", "不通", "大陆判定", "跳转异常"]), formatter: fmtVerdict },
     { title: "", field: "copy", minWidth: 66, headerSort: false, resizable: false, formatter: fmtCopy, hozAlign: "center" }
   ];
 
@@ -263,49 +300,8 @@
     setCount(table.getDataCount("data"), rows.length);
   });
 
-  function uniqueValues(rows, field) {
-    var seen = {};
-    rows.forEach(function (r) {
-      var v = r[field];
-      if (v) seen[v] = true;
-    });
-    return Object.keys(seen).sort();
-  }
-
-  function buildSelectFilters(rows) {
-    Object.keys(SELECT_FILTERS).forEach(function (field) {
-      var values = field === "国家" ? uniqueValues(rows, "国家") : SELECT_FILTERS[field];
-      var col = document.querySelector('.tabulator-col[tabulator-field="' + field + '"]');
-      if (!col) return;
-      var wrap = col.querySelector(".tabulator-header-filter");
-      if (!wrap) return;
-      var old = wrap.querySelector("select");
-      if (old) old.remove();
-      var input = wrap.querySelector("input");
-      if (input) input.style.display = "none";
-      var sel = document.createElement("select");
-      sel.setAttribute("aria-label", field + "筛选");
-      var optAll = document.createElement("option");
-      optAll.value = "";
-      optAll.textContent = "全部";
-      sel.appendChild(optAll);
-      values.forEach(function (v) {
-        var o = document.createElement("option");
-        o.value = v;
-        o.textContent = v;
-        sel.appendChild(o);
-      });
-      sel.addEventListener("change", function () {
-        table.setHeaderFilterValue(field, sel.value);
-      });
-      wrap.appendChild(sel);
-    });
-  }
-
   document.getElementById("reset").addEventListener("click", function () {
-    // clearHeaderFilter 会重建表头筛选元素，自定义的 select 要跟着重建
     table.clearHeaderFilter();
-    buildSelectFilters(table.getData());
     table.setSort([{ column: "带宽MB/s", dir: "desc" }]);
   });
 
@@ -333,7 +329,9 @@
       rows.push(r);
     });
     table.setData(rows);
-    buildSelectFilters(rows);
+    // 国家下拉的选项来自数据，数据到位后重建一次
+    var countryCol = table.getColumn("国家");
+    if (countryCol) countryCol.reloadHeaderFilter();
     statusEl.style.display = "none";
   }).catch(function (err) {
     statusEl.className = "status error";
