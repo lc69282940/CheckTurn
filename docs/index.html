@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TURN 中继海选</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.7.1/dist/css/tabulator_simple.min.css">
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #f6f8fa; color: #1f2328;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  }
+  .page { max-width: 1600px; margin: 0 auto; padding: 24px; }
+  h1 { margin: 0 0 6px; font-size: 22px; font-weight: 650; letter-spacing: .2px; }
+  .sub { margin: 0; color: #57606a; font-size: 13px; line-height: 1.7; }
+  .sub a, footer a { color: #0969da; text-decoration: none; }
+  .sub a:hover, footer a:hover { text-decoration: underline; }
+  .toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin: 18px 0 10px;
+  }
+  #count { font-size: 13px; color: #57606a; }
+  button {
+    font: inherit; font-size: 13px; cursor: pointer;
+    border: 1px solid #d0d7de; background: #f6f8fa; color: #1f2328;
+    padding: 4px 12px; border-radius: 6px;
+  }
+  button:hover { background: #eef1f4; }
+  .status { padding: 24px 0; color: #57606a; font-size: 14px; }
+  .status.error { color: #cf222e; }
+  #table { width: 100%; }
+  .tabulator { background: transparent; border: none; font-size: 13px; }
+  .tabulator .tabulator-header { background: #fff; border-bottom: 1px solid #d0d7de; }
+  .tabulator .tabulator-header .tabulator-col { background: #fff; }
+  .tabulator .tabulator-row { background: #fff; }
+  .tabulator .tabulator-row.tabulator-row-even { background: #fbfcfd; }
+  .tabulator .tabulator-row:hover { background: #f3f6f9; }
+  .tabulator .tabulator-cell { white-space: nowrap; }
+  .tabulator .tabulator-header-filter input,
+  .tabulator .tabulator-header-filter select {
+    width: 100%; font: inherit; font-size: 12px; padding: 2px 4px;
+    border: 1px solid #d0d7de; border-radius: 4px; background: #fff; color: #1f2328;
+  }
+  .tabulator .tabulator-page { border-radius: 4px; }
+  .badge {
+    display: inline-block; padding: 1px 7px; border-radius: 999px;
+    font-size: 12px; line-height: 18px; white-space: nowrap;
+  }
+  .badge.ok { background: #dafbe1; color: #1a7f37; }
+  .badge.warn { background: #fff8c5; color: #9a6700; }
+  .badge.bad { background: #ffebe9; color: #cf222e; }
+  .badge.muted { background: #eaeef2; color: #57606a; }
+  code.relay { font-size: 12px; padding: 1px 4px; border-radius: 4px; background: #f6f8fa; }
+  .num-good { color: #1a7f37; }
+  .num-mid { color: #9a6700; }
+  .num-bad { color: #cf222e; }
+  .num-strong { font-weight: 600; }
+  .copy { padding: 2px 8px; font-size: 12px; }
+  footer { margin-top: 28px; padding-bottom: 8px; color: #8c959f; font-size: 12px; line-height: 1.7; }
+  @media (max-width: 720px) {
+    .page { padding: 14px; }
+    h1 { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>TURN 中继海选</h1>
+    <p class="sub">
+      只含 <b>判定=正常且带宽&gt;0</b> 的中继，按带宽排序。数据来自
+      <a href="https://github.com/lc69282940/gh-turnrank/blob/main/rank/rank-latest.csv">rank/rank-latest.csv</a>
+      （raw 缓存约 5 分钟）· <a href="https://github.com/lc69282940/gh-turnrank">仓库</a>
+    </p>
+  </header>
+
+  <div class="toolbar">
+    <span id="count">加载中…</span>
+    <button id="reset" type="button">重置筛选</button>
+  </div>
+
+  <div id="status" class="status">正在加载数据…</div>
+  <div id="table"></div>
+
+  <footer>
+    表头下方可直接输入，或从下拉框选择筛选条件；点表头排序，右上角可改每页条数。数据由 GitHub Actions 每日更新。
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.7.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.7.1/dist/js/tabulator.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var statusEl = document.getElementById("status");
+  var countEl = document.getElementById("count");
+
+  if (typeof Tabulator === "undefined" || typeof Papa === "undefined") {
+    statusEl.className = "status error";
+    statusEl.textContent = "表格库加载失败，请刷新页面，或直接打开 rank-latest.csv 查看。";
+    return;
+  }
+
+  var CSV_SOURCES = [
+    "https://raw.githubusercontent.com/lc69282940/gh-turnrank/main/rank/rank-latest.csv?t=" + Date.now(),
+    "https://cdn.jsdelivr.net/gh/lc69282940/gh-turnrank@main/rank/rank-latest.csv"
+  ];
+  var NUMERIC = ["延迟秒", "并发", "带宽MB/s", "风控值"];
+  var SELECT_FILTERS = {
+    "Google跳转": ["无", "大陆判定"],
+    "纯净度": ["纯净", "中性", "风险", "未取到"],
+    "是否家宽": ["是", "否", "未取到"],
+    "是否原生": ["是", "否", "未取到"],
+    "国家": [],
+    "代理标记": ["是", "否"],
+    "机房标记": ["是", "否"],
+    "判定": ["正常", "不通", "大陆判定", "跳转异常"]
+  };
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined && text !== null) e.textContent = text;
+    return e;
+  }
+
+  function badge(text, kind) {
+    return el("span", "badge " + kind, text);
+  }
+
+  function num(v) {
+    if (v === null || v === undefined || v === "") return null;
+    var n = Number(v);
+    return isFinite(n) ? n : null;
+  }
+
+  function fmtRelay(cell) {
+    return el("code", "relay", cell.getValue() || "");
+  }
+
+  function fmtDelay(cell) {
+    var v = cell.getValue();
+    if (v === null || v === undefined) return "";
+    return el("span", v < 0.5 ? "num-good" : (v < 1.2 ? "num-mid" : "num-bad"), v.toFixed(3));
+  }
+
+  function fmtBW(cell) {
+    var v = cell.getValue();
+    if (v === null || v === undefined) return "";
+    return el("span", "num-strong", v.toFixed(2));
+  }
+
+  function fmtRisk(cell) {
+    var v = cell.getValue();
+    if (v === null || v === undefined) return badge("NA", "muted");
+    return badge(String(Math.round(v)), v <= 25 ? "ok" : (v <= 60 ? "warn" : "bad"));
+  }
+
+  function fmtPurity(cell) {
+    var v = cell.getValue() || "未取到";
+    return badge(v, v === "纯净" ? "ok" : (v === "中性" ? "warn" : (v === "风险" ? "bad" : "muted")));
+  }
+
+  function fmtResi(cell) {
+    var v = cell.getValue() || "未取到";
+    return badge(v, v === "是" ? "ok" : "muted");
+  }
+
+  function fmtNative(cell) {
+    var v = cell.getValue() || "未取到";
+    return badge(v, v === "是" ? "ok" : (v === "否" ? "warn" : "muted"));
+  }
+
+  function fmtFlag(cell) {
+    var v = cell.getValue() || "";
+    return badge(v || "-", v === "是" ? "warn" : "muted");
+  }
+
+  function fmtRedirect(cell) {
+    var v = cell.getValue() || "无";
+    return badge(v, v === "大陆判定" ? "bad" : "muted");
+  }
+
+  function fmtVerdict(cell) {
+    var v = cell.getValue() || "-";
+    return badge(v, v === "正常" ? "ok" : (v === "大陆判定" ? "bad" : (v === "跳转异常" ? "warn" : "muted")));
+  }
+
+  function fmtCopy(cell) {
+    var btn = el("button", "copy", "复制");
+    btn.type = "button";
+    btn.addEventListener("click", function () {
+      var text = cell.getRow().getData()["中继"] || "";
+      function done() {
+        btn.textContent = "已复制";
+        setTimeout(function () { btn.textContent = "复制"; }, 1200);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, done);
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch (e) {}
+        ta.remove();
+        done();
+      }
+    });
+    return btn;
+  }
+
+  var columns = [
+    { title: "中继", field: "中继", minWidth: 280, headerFilter: "input", formatter: fmtRelay },
+    { title: "出口IP", field: "出口IP", minWidth: 135, headerFilter: "input" },
+    { title: "延迟s", field: "延迟秒", minWidth: 85, sorter: "number", headerFilter: "input", hozAlign: "right", formatter: fmtDelay },
+    { title: "Google", field: "Google状态码", minWidth: 85, headerFilter: "input", hozAlign: "center" },
+    { title: "跳转", field: "Google跳转", minWidth: 95, headerFilter: "input", formatter: fmtRedirect },
+    { title: "并发", field: "并发", minWidth: 70, sorter: "number", headerFilter: "input", hozAlign: "right" },
+    { title: "带宽MB/s", field: "带宽MB/s", minWidth: 100, sorter: "number", headerFilter: "input", hozAlign: "right", formatter: fmtBW },
+    { title: "风控值", field: "风控值", minWidth: 85, sorter: "number", headerFilter: "input", hozAlign: "right", formatter: fmtRisk },
+    { title: "纯净度", field: "纯净度", minWidth: 85, headerFilter: "input", formatter: fmtPurity },
+    { title: "家宽", field: "是否家宽", minWidth: 70, headerFilter: "input", formatter: fmtResi },
+    { title: "原生", field: "是否原生", minWidth: 70, headerFilter: "input", formatter: fmtNative },
+    { title: "国家", field: "国家", minWidth: 70, headerFilter: "input" },
+    { title: "城市", field: "城市", minWidth: 110, headerFilter: "input" },
+    { title: "运营商", field: "运营商", minWidth: 160, headerFilter: "input" },
+    { title: "AS", field: "AS", minWidth: 180, headerFilter: "input" },
+    { title: "代理", field: "代理标记", minWidth: 70, headerFilter: "input", hozAlign: "center", formatter: fmtFlag },
+    { title: "机房", field: "机房标记", minWidth: 70, headerFilter: "input", hozAlign: "center", formatter: fmtFlag },
+    { title: "判定", field: "判定", minWidth: 80, headerFilter: "input", formatter: fmtVerdict },
+    { title: "", field: "copy", minWidth: 66, headerSort: false, resizable: false, formatter: fmtCopy, hozAlign: "center" }
+  ];
+
+  var table = new Tabulator("#table", {
+    data: [],
+    columns: columns,
+    layout: "fitData",
+    placeholder: "没有符合条件的数据",
+    pagination: true,
+    paginationSize: 50,
+    paginationSizeSelector: [25, 50, 100, 200],
+    paginationCounter: "rows",
+    initialSort: [{ column: "带宽MB/s", dir: "desc" }],
+    movableColumns: true,
+    headerFilterLiveFilterDelay: 150
+  });
+
+  function setCount(total, shown) {
+    countEl.textContent = shown === total
+      ? "共 " + total + " 条"
+      : "共 " + total + " 条，筛选后 " + shown + " 条";
+  }
+
+  table.on("dataLoaded", function (data) {
+    setCount(data.length, data.length);
+  });
+
+  table.on("dataFiltered", function (filters, rows) {
+    setCount(table.getDataCount("data"), rows.length);
+  });
+
+  function uniqueValues(rows, field) {
+    var seen = {};
+    rows.forEach(function (r) {
+      var v = r[field];
+      if (v) seen[v] = true;
+    });
+    return Object.keys(seen).sort();
+  }
+
+  function buildSelectFilters(rows) {
+    Object.keys(SELECT_FILTERS).forEach(function (field) {
+      var values = field === "国家" ? uniqueValues(rows, "国家") : SELECT_FILTERS[field];
+      var col = document.querySelector('.tabulator-col[tabulator-field="' + field + '"]');
+      if (!col) return;
+      var wrap = col.querySelector(".tabulator-header-filter");
+      if (!wrap) return;
+      var old = wrap.querySelector("select");
+      if (old) old.remove();
+      var input = wrap.querySelector("input");
+      if (input) input.style.display = "none";
+      var sel = document.createElement("select");
+      sel.setAttribute("aria-label", field + "筛选");
+      var optAll = document.createElement("option");
+      optAll.value = "";
+      optAll.textContent = "全部";
+      sel.appendChild(optAll);
+      values.forEach(function (v) {
+        var o = document.createElement("option");
+        o.value = v;
+        o.textContent = v;
+        sel.appendChild(o);
+      });
+      sel.addEventListener("change", function () {
+        table.setHeaderFilterValue(field, sel.value);
+      });
+      wrap.appendChild(sel);
+    });
+  }
+
+  document.getElementById("reset").addEventListener("click", function () {
+    // clearHeaderFilter 会重建表头筛选元素，自定义的 select 要跟着重建
+    table.clearHeaderFilter();
+    buildSelectFilters(table.getData());
+    table.setSort([{ column: "带宽MB/s", dir: "desc" }]);
+  });
+
+  function fetchCsv(i) {
+    if (i >= CSV_SOURCES.length) return Promise.reject(new Error("所有数据源都不可用"));
+    return fetch(CSV_SOURCES[i], { cache: "no-cache" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.text();
+      })
+      .then(function (text) {
+        if (text.indexOf("中继") === -1 || text.length < 50) throw new Error("内容异常");
+        return text;
+      })
+      .catch(function () { return fetchCsv(i + 1); });
+  }
+
+  fetchCsv(0).then(function (text) {
+    text = text.replace(/^\uFEFF/, "");
+    var parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+    var rows = [];
+    parsed.data.forEach(function (r) {
+      if (!r || !r["中继"]) return;
+      NUMERIC.forEach(function (k) { r[k] = num(r[k]); });
+      rows.push(r);
+    });
+    table.setData(rows);
+    buildSelectFilters(rows);
+    statusEl.style.display = "none";
+  }).catch(function (err) {
+    statusEl.className = "status error";
+    statusEl.textContent = "加载失败：" + err.message + "。可以直接打开 rank-latest.csv 查看。";
+  });
+})();
+</script>
+</body>
+</html>
