@@ -1,4 +1,4 @@
-# turnrank — TURN 中继海选
+# CheckTurn — TURN 中继海选
 ## TURN批量探测及下载网址
 https://sock.chengnice.dpdns.org
 
