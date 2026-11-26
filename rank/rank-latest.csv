@@ -1,5 +1,4 @@
 ﻿中继,出口IP,延迟秒,Google状态码,Google跳转,并发,带宽MB/s,风控值,纯净度,是否家宽,是否原生,国家,城市,运营商,AS,代理标记,机房标记,判定
-turn://34.236.64.164:3478,34.236.64.164,0.126717,200,无,2,5.67,37,中性,否,是,US,Ashburn,"Amazon.com, Inc.","AS14618 Amazon.com, Inc.",否,是,正常
 turn://23.108.190.131:3478,23.108.190.131,1.070580,200,无,2,4.97,29,中性,否,是,US,San Francisco,"Leaseweb USA, Inc.","AS7203 Leaseweb USA, Inc.",否,是,正常
 turn://66.23.204.98:3478,66.23.204.98,0.467501,200,无,2,4.90,53,中性,否,是,US,Chicago,Dedicated.com,AS63018 Dedicated.com,否,是,正常
 turn://5.161.239.143:3478,5.161.239.143,0.214008,200,无,2,3.91,88,风险,否,否,US,Ashburn,Hetzner Online GmbH,AS213230 Hetzner Online GmbH,是,是,正常
@@ -120,6 +119,7 @@ turn://198.55.51.20:3478,198.55.51.19,0.343750,200,无,2,0.71,41,中性,否,是,
 turn://206.207.50.158:3478,206.207.50.158,0.284633,200,无,2,0.71,4,纯净,否,是,US,Tempe,Arizona Tri University Network,AS2900 Arizona Tri University Network,否,否,正常
 turn://test:test@108.16.245.74:3478,108.16.245.74,0.335872,200,无,2,0.71,1,纯净,是,是,US,Media,Verizon Communications,AS701 Verizon Business,否,否,正常
 turn://193.122.170.23:3478,193.122.170.23,0.688632,200,无,2,0.71,40,中性,否,是,US,Ashburn,Oracle Corporation,AS31898 Oracle Corporation,否,是,正常
+turn://34.236.64.164:3478,34.236.64.164,0.392955,200,无,2,0.68,37,中性,否,是,US,Ashburn,"Amazon.com, Inc.","AS14618 Amazon.com, Inc.",否,是,正常
 turn://5.78.22.159:3478,5.78.119.83,0.944564,200,无,2,0.68,73,风险,否,否,US,Hillsboro,Hetzner Online GmbH,AS212317 Hetzner Online GmbH,否,是,正常
 turn://96.245.74.202:3478,96.245.74.202,0.325520,200,无,2,0.68,1,纯净,是,是,US,Coatesville,Verizon Business,AS701 Verizon Business,否,否,正常
 turn://138.197.201.154:3478,138.197.201.154,0.337380,200,无,2,0.67,30,中性,否,是,US,Santa Clara,"DigitalOcean, LLC","AS14061 DigitalOcean, LLC",否,是,正常
