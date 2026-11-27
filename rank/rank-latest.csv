@@ -106,6 +106,7 @@ turn://74.64.37.150:3478,74.64.37.150,0.329066,200,无,2,0.72,9,纯净,是,是,U
 turn://208.72.189.206:3478,208.72.189.206,0.369260,200,无,2,0.71,6,纯净,是,是,US,Los Angeles,"Voxology Carrier Services, Inc.","AS40165 Voxology Carrier Services, Inc.",否,否,正常
 turn://24.5.14.146:3478,24.5.14.146,0.294042,200,无,2,0.71,6,纯净,是,是,US,Rohnert Park,"Comcast Cable Communications, LLC","AS7922 Comcast Cable Communications, LLC",否,否,正常
 turn://131.148.201.37:5349,131.148.201.37,0.390185,200,无,2,0.70,1,纯净,是,是,US,Bessemer,Charter Communications LLC,"AS33363 Charter Communications, Inc",否,否,正常
+turn://186.244.240.207:3478,186.244.240.207,0.676367,200,无,2,0.70,37,中性,否,是,US,Los Angeles,Arosscloud Inc.,AS400619 AROSSCLOUD INC.,否,是,正常
 turn://147.93.133.235:3478,147.93.133.235,0.353927,200,无,2,0.69,30,中性,否,否,US,St Louis,Contabo Inc.,AS40021 Contabo Inc.,否,是,正常
 turn://217.77.2.132:3478,217.77.2.132,0.270224,200,无,2,0.69,42,中性,否,否,US,St Louis,7Global Ltd,AS40021 Contabo Inc.,否,是,正常
 turn://24.213.7.100:5349,24.213.7.98,0.352118,200,无,2,0.68,9,纯净,是,是,US,Negaunee,Charter Communications,AS20115 Charter Communications LLC,否,否,正常
@@ -302,6 +303,7 @@ turn://157.230.140.236:3478,157.230.140.236,0.428059,200,无,2,0.33,43,中性,�
 turn://85.215.237.102:3478,85.215.237.102,0.626196,200,无,2,0.33,17,纯净,是,是,DE,Berlin,IONOS SE,AS8560 IONOS SE,否,是,正常
 turn://3.70.224.86:3478,3.70.224.86,1.039335,200,无,2,0.33,43,中性,否,否,DE,Frankfurt,Amazon Technologies Inc.,"AS16509 Amazon.com, Inc.",否,是,正常
 turn://103.179.45.109:3478,103.179.45.109,1.729598,200,无,2,0.33,60,中性,否,否,JP,Tokyo,WebHorizon Internet Services,AS149020 WebHorizon Internet Services,否,否,正常
+turn://213.32.71.101:3478,213.32.71.101,1.089338,200,无,2,0.33,40,中性,否,是,FR,Gravelines,OVH SAS,AS16276 OVH SAS,否,是,正常
 turn://49.12.243.224:3478,49.12.243.224,0.672169,200,无,2,0.32,32,中性,否,是,DE,Falkenstein,Hetzner Online GmbH,AS24940 Hetzner Online GmbH,否,是,正常
 turn://152.53.144.165:3478,152.53.144.165,0.635118,200,无,2,0.32,57,中性,否,否,DE,Nuremberg,netcup GmbH,AS197540 netcup GmbH,否,是,正常
 turn://16.170.85.55:3478,16.170.85.55,0.681504,200,无,2,0.32,42,中性,否,否,SE,Stockholm,Amazon.com,"AS16509 Amazon.com, Inc.",否,是,正常
@@ -617,6 +619,7 @@ turn://51.38.110.14:3478,51.38.110.14,0.982435,200,无,2,0.21,29,中性,否,是,
 turn://103.7.200.30:3479,103.7.200.30,1.006982,200,无,2,0.21,8,纯净,是,是,SG,Singapore,MYREPUBLIC,AS56300 MyRepublic Ltd.,否,否,正常
 turn://173.249.33.91:3478,173.249.33.91,0.979149,200,无,2,0.21,49,中性,否,否,FR,Lauterbourg,Contabo GmbH,AS51167 Contabo GmbH,否,是,正常
 turn://188.245.197.136:3478,188.245.197.136,1.054555,200,无,2,0.21,42,中性,否,是,DE,Falkenstein,Hetzner Online GmbH,AS24940 Hetzner Online GmbH,否,是,正常
+turn://99.82.211.30:3478,99.82.211.30,0.459146,200,无,2,0.21,5,纯净,是,是,US,Corbin,"AT&T Enterprises, LLC","AS7018 AT&T Enterprises, LLC",否,否,正常
 turn://31.76.31.196:3478,31.76.31.196,0.991565,200,无,2,0.20,68,风险,否,否,FI,Helsinki,PowerRDP Network LTD,AS197283 PowerRDP Network LTD,否,是,正常
 turn://turn:turn@213.179.138.203:3478,213.179.138.203,1.604356,200,无,2,0.20,1,纯净,是,是,DE,Munich,M-net Telekommunikations GmbH,AS8767 M-net Telekommunikations GmbH,否,否,正常
 turn://62.45.174.24:3478,62.45.174.24,0.941665,200,无,2,0.20,8,纯净,是,是,NL,Zutphen,DELTA Fiber Nederland,AS15435 DELTA Fiber Nederland B.V.,否,否,正常
@@ -667,6 +670,7 @@ turn://63.250.59.88:3478,63.250.59.88,1.362532,200,无,2,0.20,72,风险,否,否,
 turn://5.9.96.209:3478,5.9.96.209,1.571740,200,无,2,0.20,38,中性,否,是,DE,Falkenstein,Hetzner Online GmbH,AS24940 Hetzner Online GmbH,否,是,正常
 turn://195.228.155.226:3478,195.228.155.226,1.574798,200,无,2,0.20,4,纯净,是,是,HU,Budapest,Magyar Telekom plc.,AS5483 Magyar Telekom Plc.,否,是,正常
 turn://129.226.214.137:3478,129.226.214.137,2.169635,200,无,2,0.20,53,中性,否,是,SG,Singapore,Tencent Cloud Computing (Beijing) Co,"AS132203 Tencent Building, Kejizhongyi Avenue",否,是,正常
+turn://193.26.159.139:3478,193.26.159.139,1.608347,200,无,2,0.20,44,中性,否,否,DE,Nuremberg,netcup GmbH,AS197540 netcup GmbH,否,是,正常
 turn://83.13.244.126:3478,83.13.244.126,1.003402,200,无,2,0.19,4,纯净,是,是,PL,Warsaw,Orange Polska Spolka Akcyjna,AS5617 Orange Polska Spolka Akcyjna,否,否,正常
 turn://46.62.133.184:3478,46.62.133.184,1.730205,200,无,2,0.19,47,中性,否,否,FI,Helsinki,Hetzner Online GmbH,AS24940 Hetzner Online GmbH,否,是,正常
 turn://163.47.131.236:3478,163.47.131.236,0.950565,200,无,1,0.19,9,纯净,是,是,NZ,Auckland,Vetta Group,AS64073 Vetta Group,否,否,正常
@@ -806,6 +810,7 @@ turn://95.31.20.137:3478,95.31.20.137,1.656604,200,无,1,0.17,24,纯净,是,是,
 turn://109.71.11.162:3478,109.71.11.162,1.311624,200,无,2,0.17,35,中性,否,是,RU,Moscow,Selectel,AS50340 JSC Selectel,否,否,正常
 turn://83.68.35.165:3478,83.68.35.165,1.201766,200,无,2,0.17,10,纯净,是,是,RU,St Petersburg,SeaExpress Ltd,AS31444 SeaExpress Ltd.,否,否,正常
 turn://177.125.244.38:3478,177.125.244.38,1.902118,200,无,1,0.17,3,纯净,是,是,BR,Itapiranga,Nedel Telecom,AS262360 NEDEL TELECOM,否,否,正常
+turn://178.209.107.122:3478,89.107.207.82,1.235189,200,无,1,0.17,10,纯净,是,是,RU,Ryazan,JSC Transport Digital Networks,AS29226 JSC Mastertel,否,否,正常
 turn://77.20.243.38:3478,77.20.243.38,1.134707,200,无,2,0.16,6,纯净,是,是,DE,Hamburg,Vodafone Kabel Deutschland,AS3209 Vodafone GmbH,否,否,正常
 turn://62.56.141.78:3478,62.56.141.78,1.341708,200,无,2,0.16,1,纯净,是,是,IL,Kadima Zoran,Gilat Telecom Ltd,AS12491 Gilat Telecom Ltd.,否,否,正常
 turn://85.192.20.72:3478,85.192.20.72,2.832412,200,无,1,0.16,3,纯净,是,是,RU,Moscow,LLC Digital Network,AS12695 LLC Digital Network,否,否,正常
@@ -888,6 +893,7 @@ turn://124.217.248.174:3478,124.217.248.174,3.112020,200,无,2,0.15,65,风险,�
 turn://34.143.164.85:3478,34.143.164.85,2.250412,200,无,2,0.15,38,中性,否,否,SG,Singapore,Google LLC,AS396982 Google LLC,否,是,正常
 turn://83.174.209.87:3478,83.174.209.87,1.423323,200,无,1,0.15,4,纯净,是,是,RU,Ufa,"PJSC ""Bashinformsvyaz""","AS28812 PJSC ""Bashinformsvyaz""",否,否,正常
 turn://177.234.164.246:3478,177.234.164.246,1.500547,200,无,1,0.15,1,纯净,是,是,BR,Bom Jesus da Lapa,Barbosa & Costa Ltda,AS263250 Barbosa & Costa Ltda,否,否,正常
+turn://138.122.44.135:3478,138.122.44.135,1.495291,200,无,1,0.15,1,纯净,是,是,BR,Serra do Mel,Ciclo Tecnologia,AS264315 Ciclo Tecnologia,否,否,正常
 turn://103.177.120.72:3478,103.177.120.72,1.178293,200,无,1,0.14,6,纯净,是,是,IN,New Delhi,Budhiraja Internet Services,AS133982 Excitel Broadband Private Limited,否,否,正常
 turn://90.112.252.93:3478,90.112.252.93,0.648435,200,无,2,0.14,2,纯净,是,是,FR,Grenoble,Orange,AS3215 Orange S.A.,否,否,正常
 turn://47.84.0.145:3478,47.84.0.145,2.441934,200,无,2,0.14,34,中性,否,否,SG,Singapore,Alibaba.com LLC,"AS45102 Alibaba (US) Technology Co., Ltd.",否,是,正常
